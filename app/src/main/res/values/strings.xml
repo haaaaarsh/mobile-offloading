@@ -10,4 +10,7 @@
     <string name="slave">Slave</string>
     <string name="pick_role">Pick a Role</string>
 
+    <!--    Master-->
+    <string name="btn_advertise">Start Advertising</string>
+
 </resources>

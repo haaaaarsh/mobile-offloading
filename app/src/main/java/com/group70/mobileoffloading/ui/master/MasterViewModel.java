@@ -1,6 +1,9 @@
 package com.group70.mobileoffloading.ui.master;
 
+import android.location.Location;
 import android.util.Log;
+
+import androidx.databinding.ObservableField;
 
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
@@ -14,15 +17,17 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
     private final String TAG = "MasterActivity<>";
     private MasterNavigator navigator;
+    private ObservableField<String> connectionStatus = new ObservableField<>();
 
     public MasterViewModel() {
 
     }
 
-    public void startAdvertising(ConnectionsClient connectionsClient, String name) {
+    public void startAdvertising() {
+        String name = android.os.Build.MODEL;
         navigator = getNavigator();
         try {
-            connectionsClient.startAdvertising(name,
+            getNavigator().getConnectionsClientInstance().startAdvertising(name,
                     getNavigator().getActivityContext().getPackageName(),
                     connectionLifecycleCallback,
                     new AdvertisingOptions.Builder().setStrategy(Strategy.P2P_STAR).build());
@@ -42,7 +47,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                     Log.e(TAG, "onConnectionInitiated: establishing connection");
                     slaveName = connectionInfo.getEndpointName();
                     slaveId = endpointId;
-                    navigator.showConnectionStatus("Connecting to: " + slaveName + " : " + slaveId);
+                    setConnectionStatus("Connecting to: " + slaveName + " : " + slaveId);
                     navigator.showAlertDialog(endpointId, connectionInfo);
                 }
 
@@ -52,7 +57,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 //                        if (sertype.equals("Master")) {
 
                         navigator.getConnectionsClientInstance().stopAdvertising();
-                        navigator.showConnectionStatus("Latest Connected to : " + slaveName + " : " + slaveId);
+                        setConnectionStatus("Latest Connected to : " + slaveName + " : " + slaveId);
 
                         /*} else {
                             connectionsClient.stopDiscovery();
@@ -76,7 +81,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                     } else {
                         Log.e(TAG, "onConnectionResult: connection failed");
 //                        if (sertype.equals("Master")) {
-                        navigator.showConnectionStatus("Connection failed: " + slaveName + " : " + slaveId);
+                        setConnectionStatus("Connection failed: " + slaveName + " : " + slaveId);
 //                        } else {
 //                            setconn.setText("Connection Failed: " + mName + " : " + mid);
 //                        }
@@ -85,22 +90,47 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
                 @Override
                 public void onDisconnected(String endpointId) {
-                        if (navigator.getSlavesMap().containsKey(endpointId)) {
-                            int[] b = navigator.getSlavesMap().get(endpointId);
-                            navigator.removeSlaveMap(endpointId);
-                            navigator.addToSlaveLinkList(b);
-                        }
-                        navigator.showConnectionStatus("Disconnected: " + endpointId);
-                        if (navigator.getSlavesMap2().containsKey(endpointId)) {
-                            navigator.removeConnection(new String(navigator.getSlavesMap2().get(endpointId).name));
-                            /**navigator.setConnectionsList();*/
-                            navigator.getSlavesMap2().get(endpointId).connected = false;
-                        }
-                       /** listSlaves();*/
-                        if (navigator.getSlavesMap2().size() > 0) {
-                           /** prints();*/
-                        }
+                    if (navigator.getSlavesMap().containsKey(endpointId)) {
+                        int[] b = navigator.getSlavesMap().get(endpointId);
+                        navigator.removeSlaveMap(endpointId);
+                        navigator.addToSlaveLinkList(b);
+                    }
+                    setConnectionStatus("Disconnected: " + endpointId);
+                    if (navigator.getSlavesMap2().containsKey(endpointId)) {
+                        navigator.removeConnection(new String(navigator.getSlavesMap2().get(endpointId).name));
+                        /**navigator.setConnectionsList();*/
+                        navigator.getSlavesMap2().get(endpointId).connected = false;
+                    }
+                    /** listSlaves();*/
+                    if (navigator.getSlavesMap2().size() > 0) {
+                        /** prints();*/
+                    }
                 }
             };
 
+
+    public double getDistance(double lat1, double lon1, double lat2, double lon2, String s_name) {
+        if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
+            return 0;
+        }
+        Location startPoint = new Location("locationA");
+        startPoint.setLatitude(lat1);
+        startPoint.setLongitude(lon1);
+
+        Location endPoint = new Location("locationA");
+        endPoint.setLatitude(lat2);
+        endPoint.setLongitude(lon2);
+
+//        Toast.makeText(MainActivity.this, "Distance From Slave("+s_name+"): "+String.valueOf(startPoint.distanceTo(endPoint)), Toast.LENGTH_LONG).show();
+
+        return startPoint.distanceTo(endPoint);
+    }
+
+    public ObservableField<String> getConnectionStatus() {
+        return connectionStatus;
+    }
+
+    public void setConnectionStatus(String connectionStatus) {
+        this.connectionStatus.set(connectionStatus);
+    }
 }

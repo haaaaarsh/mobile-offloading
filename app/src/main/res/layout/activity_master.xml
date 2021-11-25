@@ -38,12 +38,16 @@
 
 
                 <TextView
-                    android:id="@+id/txt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="MASTER"/>
+                    android:text="@{viewModel.connectionStatus}" />
 
-
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:onClick="@{() -> viewModel.startAdvertising()}"
+                    android:text="@string/btn_advertise" />
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.core.widget.NestedScrollView>
 

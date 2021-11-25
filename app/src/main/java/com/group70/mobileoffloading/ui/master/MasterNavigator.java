@@ -17,8 +17,6 @@ public interface MasterNavigator {
 
     ConnectionsClient getConnectionsClientInstance();
 
-    void showConnectionStatus(String message);
-
     Map<String, int[]> getSlavesMap();
 
     Map<String, Slave> getSlavesMap2();
