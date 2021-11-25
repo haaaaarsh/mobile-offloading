@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Mobile Offloading</string>
+
+    <!--    Role Picker-->
+    <string name="master">Master</string>
+    <string name="slave">Slave</string>
+
 </resources>

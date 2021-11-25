@@ -1,4 +1,4 @@
-package com.group70.mobileoffloading.ui.main;
+package com.group70.mobileoffloading.ui.master;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,17 +9,17 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.base.BaseActivity;
-import com.group70.mobileoffloading.databinding.ActivityMainBinding;
+import com.group70.mobileoffloading.databinding.ActivityMasterBinding;
 
-public class MainActivity extends BaseActivity<MainViewModel> implements MainNavigator {
+public class MasterActivity extends BaseActivity<MasterViewModel> implements MasterNavigator {
 
-    ActivityMainBinding binding;
+    ActivityMasterBinding binding;
 
     @NonNull
     @Override
-    protected MainViewModel createViewModel() {
-        MainViewModelFactory factory = new MainViewModelFactory();
-        return ViewModelProviders.of(this, factory).get(MainViewModel.class);
+    protected MasterViewModel createViewModel() {
+        MasterViewModelFactory factory = new MasterViewModelFactory();
+        return ViewModelProviders.of(this, factory).get(MasterViewModel.class);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class MainActivity extends BaseActivity<MainViewModel> implements MainNav
     }
 
     private void setDataBindings() {
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_master);
         binding.setViewModel(viewModel);
         binding.executePendingBindings();
     }

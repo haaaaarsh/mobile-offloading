@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProviders;
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.base.BaseActivity;
 import com.group70.mobileoffloading.databinding.ActivitySplashBinding;
-import com.group70.mobileoffloading.ui.main.MainActivity;
+import com.group70.mobileoffloading.ui.rolepicker.RolePickerActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +40,7 @@ public class SplashActivity extends BaseActivity<SplashViewModel> implements Spl
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                openActivity(MainActivity.class);
+                openActivity(RolePickerActivity.class);
                 finish();
             }
         }, TimeUnit.SECONDS.toMillis(1));
