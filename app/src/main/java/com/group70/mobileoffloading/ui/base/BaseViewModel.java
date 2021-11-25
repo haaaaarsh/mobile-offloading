@@ -1,4 +1,4 @@
-package com.group70.mobileoffloading.base;
+package com.group70.mobileoffloading.ui.base;
 
 import androidx.lifecycle.ViewModel;
 

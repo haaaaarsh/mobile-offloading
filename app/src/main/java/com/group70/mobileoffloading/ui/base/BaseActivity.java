@@ -1,4 +1,4 @@
-package com.group70.mobileoffloading.base;
+package com.group70.mobileoffloading.ui.base;
 
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +38,10 @@ public abstract class BaseActivity<VM extends ViewModel> extends AppCompatActivi
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         }
+    }
+
+    public String getDeviceName() {
+        return android.os.Build.MODEL;
     }
 
     public void showSnackbar(String message, int bgColor, int txtColor) {

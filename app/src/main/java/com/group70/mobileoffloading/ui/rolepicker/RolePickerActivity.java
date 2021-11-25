@@ -11,7 +11,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.group70.mobileoffloading.R;
-import com.group70.mobileoffloading.base.BaseActivity;
+import com.group70.mobileoffloading.ui.base.BaseActivity;
 import com.group70.mobileoffloading.databinding.ActivityRolePickerBinding;
 import com.group70.mobileoffloading.ui.master.MasterActivity;
 import com.group70.mobileoffloading.ui.slave.SlaveActivity;

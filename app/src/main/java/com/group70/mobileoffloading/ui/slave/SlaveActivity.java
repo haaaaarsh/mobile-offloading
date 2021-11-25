@@ -8,7 +8,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.group70.mobileoffloading.R;
-import com.group70.mobileoffloading.base.BaseActivity;
+import com.group70.mobileoffloading.ui.base.BaseActivity;
 import com.group70.mobileoffloading.databinding.ActivitySlaveBinding;
 
 public class SlaveActivity extends BaseActivity<SlaveViewModel> implements SlaveNavigator {
@@ -27,6 +27,12 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
         super.onCreate(savedInstanceState);
         setDataBindings();
         viewModel.setNavigator(this);
+        setToolBar();
+    }
+
+    private void setToolBar() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(getDeviceName() + " " + getResources().getString(R.string.title_slave));
     }
 
     private void setDataBindings() {

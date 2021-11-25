@@ -1,8 +1,13 @@
 <resources>
     <string name="app_name">Mobile Offloading</string>
 
+    <!--    Toolbar Titles-->
+    <string name="title_master">(Master)</string>
+    <string name="title_slave">(Slave)</string>
+
     <!--    Role Picker-->
     <string name="master">Master</string>
     <string name="slave">Slave</string>
+    <string name="pick_role">Pick a Role</string>
 
 </resources>

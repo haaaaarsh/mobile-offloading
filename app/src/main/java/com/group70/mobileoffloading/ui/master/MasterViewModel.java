@@ -1,10 +1,106 @@
 package com.group70.mobileoffloading.ui.master;
 
-import com.group70.mobileoffloading.base.BaseViewModel;
+import android.util.Log;
+
+import com.google.android.gms.nearby.connection.AdvertisingOptions;
+import com.google.android.gms.nearby.connection.ConnectionInfo;
+import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
+import com.google.android.gms.nearby.connection.ConnectionResolution;
+import com.google.android.gms.nearby.connection.ConnectionsClient;
+import com.google.android.gms.nearby.connection.Strategy;
+import com.group70.mobileoffloading.ui.base.BaseViewModel;
 
 public class MasterViewModel extends BaseViewModel<MasterNavigator> {
+
+    private final String TAG = "MasterActivity<>";
+    private MasterNavigator navigator;
 
     public MasterViewModel() {
 
     }
+
+    public void startAdvertising(ConnectionsClient connectionsClient, String name) {
+        navigator = getNavigator();
+        try {
+            connectionsClient.startAdvertising(name,
+                    getNavigator().getActivityContext().getPackageName(),
+                    connectionLifecycleCallback,
+                    new AdvertisingOptions.Builder().setStrategy(Strategy.P2P_STAR).build());
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+    }
+
+
+    private final ConnectionLifecycleCallback connectionLifecycleCallback =
+            new ConnectionLifecycleCallback() {
+                String slaveName = null;
+                String slaveId = null;
+
+                @Override
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
+                    Log.e(TAG, "onConnectionInitiated: establishing connection");
+                    slaveName = connectionInfo.getEndpointName();
+                    slaveId = endpointId;
+                    navigator.showConnectionStatus("Connecting to: " + slaveName + " : " + slaveId);
+                    navigator.showAlertDialog(endpointId, connectionInfo);
+                }
+
+                @Override
+                public void onConnectionResult(String endpointId, ConnectionResolution result) {
+                    if (result.getStatus().isSuccess()) {
+//                        if (sertype.equals("Master")) {
+
+                        navigator.getConnectionsClientInstance().stopAdvertising();
+                        navigator.showConnectionStatus("Latest Connected to : " + slaveName + " : " + slaveId);
+
+                        /*} else {
+                            connectionsClient.stopDiscovery();
+                            setconn.setText("Connected to master: " + mName + " : " + mid);
+//                            disconnect.setVisibility(View.VISIBLE);
+                            connect.setEnabled(false);
+                            disconnect.setEnabled(true);
+                            disconnect.setOnClickListener(v -> {
+                                connectionsClient.disconnectFromEndpoint(mid);
+                                recreate();
+                            });
+
+                            getLocation();
+                            Slave senslave = new Slave(sername, slaveId, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
+                            connectionsClient.sendPayload(mid, Payload.fromStream(new ByteArrayInputStream(gson.toJson(senslave).getBytes(UTF_8))));
+                            Log.e(TAG, "sent");
+                            TimerTask timerTask = new KeepSending();
+                            timer = new Timer(true);
+                            timer.scheduleAtFixedRate(timerTask, 0, 10000);
+                        }*/
+                    } else {
+                        Log.e(TAG, "onConnectionResult: connection failed");
+//                        if (sertype.equals("Master")) {
+                        navigator.showConnectionStatus("Connection failed: " + slaveName + " : " + slaveId);
+//                        } else {
+//                            setconn.setText("Connection Failed: " + mName + " : " + mid);
+//                        }
+                    }
+                }
+
+                @Override
+                public void onDisconnected(String endpointId) {
+                        if (navigator.getSlavesMap().containsKey(endpointId)) {
+                            int[] b = navigator.getSlavesMap().get(endpointId);
+                            navigator.removeSlaveMap(endpointId);
+                            navigator.addToSlaveLinkList(b);
+                        }
+                        navigator.showConnectionStatus("Disconnected: " + endpointId);
+                        if (navigator.getSlavesMap2().containsKey(endpointId)) {
+                            navigator.removeConnection(new String(navigator.getSlavesMap2().get(endpointId).name));
+                            /**navigator.setConnectionsList();*/
+                            navigator.getSlavesMap2().get(endpointId).connected = false;
+                        }
+                       /** listSlaves();*/
+                        if (navigator.getSlavesMap2().size() > 0) {
+                           /** prints();*/
+                        }
+                }
+            };
+
 }
