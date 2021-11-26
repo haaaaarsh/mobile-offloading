@@ -15,6 +15,8 @@ import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -28,20 +30,19 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.data.Slave;
-import com.group70.mobileoffloading.ui.base.BaseActivity;
 import com.group70.mobileoffloading.databinding.ActivityMasterBinding;
+import com.group70.mobileoffloading.ui.base.BaseActivity;
+import com.group70.mobileoffloading.utils.AppUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class MasterActivity extends BaseActivity<MasterViewModel> implements MasterNavigator {
+public class MasterActivity extends BaseActivity<MasterViewModel> implements MasterNavigator, SlaveAdapter.SlaveClickListener {
 
     ActivityMasterBinding binding;
     private final String TAG = "MasterActivity<>";
@@ -50,8 +51,9 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     private static volatile Map<String, int[]> slavesMap = new LinkedHashMap<>();
     private static volatile LinkedList<int[]> slaveLinkList = new LinkedList<>();
     private static Map<String, Slave> slaveMap2 = new HashMap<>();
-    private ArrayList<String> connectedList = new ArrayList<>();
+    private ArrayList<Slave> connectedList = new ArrayList<>();
     private double lat, lon;
+    private SlaveAdapter adapter;
 
     @NonNull
     @Override
@@ -67,6 +69,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         viewModel.setNavigator(this);
         setToolBar();
         setConnectionClients();
+        setRecyclerView();
     }
 
     private void setConnectionClients() {
@@ -135,11 +138,11 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     try {
                         if (slave.result == null) {
                             /**writeToFile(slave);*/
-                            if (slave.bat > 20 && viewModel.getDistance(lat, lon, slave.lat, slave.lon, slave.name) < 2000) {
+                            if (slave.bat > 20 && AppUtils.getDistance(lat, lon, slave.lat, slave.lon, slave.name) < 2000) {
                                 if (!slaveMap2.containsKey(endpointId)) {
                                     slave.connected = true;
                                     slaveMap2.put(endpointId, slave);
-                                    /**setupSlaveList();*/
+                                    addSlaveToList();
                                 }
                                 /**scompute.setEnabled(true);*/
                                 /**listSlaves();*/
@@ -152,8 +155,8 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 }
                                 viewModel.setConnectionStatus("Disconnected: " + endpointId);
                                 if (slaveMap2.containsKey(endpointId)) {
-                                    connectedList.remove(new String(slaveMap2.get(endpointId).name));
-                                    /**makeList();*/
+                                    removeConnection(slaveMap2.get(endpointId));
+                                    setRecyclerView();
                                     slaveMap2.get(endpointId).connected = false;
                                 }
                                 /**listSlaves();*/
@@ -221,6 +224,27 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                 }
             };
 
+    private void addSlaveToList() {
+        for (String k : slaveMap2.keySet()) {
+            if (!connectedList.contains(slaveMap2.get(k))) {
+                addConnection(slaveMap2.get(k));
+                AppUtils.writeToFile(this, slaveMap2.get(k));
+            }
+
+        }
+    }
+
+    private void setRecyclerView() {
+        adapter = new SlaveAdapter(this, this);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(binding.rvSlaves.getContext(),
+                new LinearLayoutManager(this).getOrientation());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        binding.rvSlaves.setLayoutManager(layoutManager);
+        binding.rvSlaves.addItemDecoration(dividerItemDecoration);
+        binding.rvSlaves.setAdapter(adapter);
+        adapter.addAll(connectedList);
+    }
+
     @Override
     public ConnectionsClient getConnectionsClientInstance() {
         return connectionsClient;
@@ -272,22 +296,27 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     }
 
     @Override
-    public ArrayList<String> getConnections() {
+    public ArrayList<Slave> getConnections() {
         return connectedList;
     }
 
     @Override
-    public void addConnection(String s) {
-        connectedList.add(s);
+    public void addConnection(Slave s) {
+        adapter.add(s);
     }
 
     @Override
-    public void removeConnection(String s) {
-        connectedList.remove(s);
+    public void removeConnection(Slave s) {
+        adapter.remove(s);
     }
 
     @Override
     public void setConnectionsList() {
+
+    }
+
+    @Override
+    public void onSlaveClick(Slave slave) {
 
     }
 }

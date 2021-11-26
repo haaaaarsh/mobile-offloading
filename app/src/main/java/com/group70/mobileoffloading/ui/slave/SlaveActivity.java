@@ -17,6 +17,7 @@ import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.Observable;
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -91,6 +92,15 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
                  connectionsClient.requestConnection(sername, endpointId, connectionLifecycleCallback);
 
                  });*/
+            }
+        });
+
+        viewModel.getIsMasterConnected().addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                boolean isConnect = ((ObservableBoolean) sender).get();
+                binding.connectToggle.setText(isConnect ? getResources().getString(R.string.disconnect)
+                        : getResources().getString(R.string.connect));
             }
         });
     }

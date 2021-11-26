@@ -98,7 +98,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                     }
                     setConnectionStatus("Disconnected: " + endpointId);
                     if (navigator.getSlavesMap2().containsKey(endpointId)) {
-                        navigator.removeConnection(new String(navigator.getSlavesMap2().get(endpointId).name));
+                        navigator.removeConnection(navigator.getSlavesMap2().get(endpointId));
                         /**navigator.setConnectionsList();*/
                         navigator.getSlavesMap2().get(endpointId).connected = false;
                     }
@@ -109,23 +109,6 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                 }
             };
 
-
-    public double getDistance(double lat1, double lon1, double lat2, double lon2, String s_name) {
-        if (lat1 == 0 || lon1 == 0 || lat2 == 0 || lon2 == 0) {
-            return 0;
-        }
-        Location startPoint = new Location("locationA");
-        startPoint.setLatitude(lat1);
-        startPoint.setLongitude(lon1);
-
-        Location endPoint = new Location("locationA");
-        endPoint.setLatitude(lat2);
-        endPoint.setLongitude(lon2);
-
-//        Toast.makeText(MainActivity.this, "Distance From Slave("+s_name+"): "+String.valueOf(startPoint.distanceTo(endPoint)), Toast.LENGTH_LONG).show();
-
-        return startPoint.distanceTo(endPoint);
-    }
 
     public ObservableField<String> getConnectionStatus() {
         return connectionStatus;

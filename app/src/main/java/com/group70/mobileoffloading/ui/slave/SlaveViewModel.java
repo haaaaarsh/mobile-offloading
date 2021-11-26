@@ -22,7 +22,7 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
     private ObservableField<String> masterName = new ObservableField<>();
     private ObservableField<Boolean> endPointDiscover = new ObservableField<>(false);
     private ObservableBoolean mIsLoading = new ObservableBoolean();
-    private ObservableBoolean isMasterConnected = new ObservableBoolean();
+    private ObservableBoolean isMasterConnected = new ObservableBoolean(false);
     private String masterDeviceName = null, masterDeviceId = null;
 
     public SlaveViewModel() {
@@ -59,10 +59,16 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
                 }
             };
 
-    public void connect() {
-        getNavigator().getConnectionsClientInstance().requestConnection(getNavigator().getDeviceName(),
-                masterDeviceId,
-                connectionLifecycleCallback);
+    public void connectDisconnectToggle() {
+        if (!isMasterConnected.get())
+            getNavigator().getConnectionsClientInstance().requestConnection(getNavigator().getDeviceName(),
+                    masterDeviceId,
+                    connectionLifecycleCallback);
+        else {
+            getNavigator().getConnectionsClientInstance().disconnectFromEndpoint(getMasterDeviceId());
+            setIsMasterConnected(false);
+//            ((SlaveActivity) getNavigator().getActivityContext()).recreate();
+        }
     }
 
     private final ConnectionLifecycleCallback connectionLifecycleCallback =

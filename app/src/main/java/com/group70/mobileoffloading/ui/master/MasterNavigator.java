@@ -36,11 +36,11 @@ public interface MasterNavigator {
 
     void removeSlaveLinkList();
 
-    ArrayList<String> getConnections();
+    ArrayList<Slave> getConnections();
 
-    void addConnection(String s);
+    void addConnection(Slave s);
 
-    void removeConnection(String s);
+    void removeConnection(Slave s);
 
     void setConnectionsList();
 }

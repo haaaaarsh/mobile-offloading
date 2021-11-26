@@ -31,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:animateLayoutChanges="true"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:gravity="center"
@@ -38,11 +39,17 @@
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp">
 
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@{viewModel.connectionStatus}" />
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvSlaves"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none" />
 
                 <Button
                     android:layout_width="wrap_content"
@@ -53,7 +60,7 @@
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.core.widget.NestedScrollView>
 
-        <RelativeLayout
+        <!--<RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="true"
@@ -64,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true" />
-        </RelativeLayout>
+        </RelativeLayout>-->
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </layout>

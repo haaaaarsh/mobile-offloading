@@ -15,5 +15,7 @@
 
     <!--    Slave-->
     <string name="btn_scan">Start Scanning</string>
+    <string name="connect">Tap to Connect</string>
+    <string name="disconnect">Tap to Disconnect</string>
 
 </resources>
