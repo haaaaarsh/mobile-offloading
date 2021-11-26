@@ -53,7 +53,7 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
         }
 
         void bindData(final int position) {
-            binding.time.setText(slavesList.get(position).name);
+            binding.name.setText(slavesList.get(position).name);
             binding.rlRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

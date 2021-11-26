@@ -137,7 +137,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     //                    if (sertype.equals("Master")) {
                     try {
                         if (slave.result == null) {
-                            /**writeToFile(slave);*/
+                            AppUtils.writeToFile(MasterActivity.this, slave);
                             if (slave.bat > 20 && AppUtils.getDistance(lat, lon, slave.lat, slave.lon, slave.name) < 2000) {
                                 if (!slaveMap2.containsKey(endpointId)) {
                                     slave.connected = true;
@@ -165,8 +165,8 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 }
                             }
                         } else {
-                            /**computeOutput(slave, endpointId);
-                             writeToFile(slave);*/
+                            /**computeOutput(slave, endpointId);*/
+                            AppUtils.writeToFile(MasterActivity.this, slave);
                             if (!slaveLinkList.isEmpty()) {
                                 /**generateSlaveMatrix(endpointId);*/
                             } else if (slavesMap.isEmpty()) {
@@ -189,33 +189,6 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     } catch (Exception e) {
                         Log.e(TAG, e.toString());
                     }
-                    /*} else {
-                        try {
-                            if (slave.comp) {
-                                computing = false;
-                                long endTime = System.currentTimeMillis();
-                                BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
-                                long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-
-                                Double totalEnergy = (1.0 * (Math.abs(startbatteryslave - endEnergy))) / 1000;
-                                setconn.setText("Finished in " + (double) (endTime - startslave) / 1000 + " seconds\n" + "Power Consumed: " + totalEnergy + " mAh");
-//                                startbatteryslave = 0;
-                            } else {
-                                if (!computing) {
-                                    computing = true;
-                                    startslave = System.currentTimeMillis();
-                                    BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
-                                    startbatteryslave = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-                                }
-                                setconn.setText("Performing matrix multiplication for: " + mName + " : " + mid);
-                                Log.d("hello", "check");
-                                multiplication(slave);
-                                connectionsClient.sendPayload(mid, Payload.fromStream(new ByteArrayInputStream(gson.toJson(slave).getBytes(UTF_8))));
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, e.toString());
-                        }
-                    }*/
                 }
 
                 @Override

@@ -82,16 +82,7 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
         viewModel.getEndPointDiscover().addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                boolean b = ((ObservableField<Boolean>) sender).get();
-                /**find.setEnabled(false);*/
-                /**connect.setVisibility(View.VISIBLE);
-                 connect.setEnabled(true);
-                 connect.setText("Connect");
-                 connect.setOnClickListener(v -> {
-                 setConnectionStatus("Connecting to Master: " + masterName + " : " + masterId);
-                 connectionsClient.requestConnection(sername, endpointId, connectionLifecycleCallback);
 
-                 });*/
             }
         });
 
@@ -207,13 +198,6 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
         if (result.getStatus().isSuccess()) {
             connectionsClient.stopDiscovery();
             viewModel.setConnectionStatus("Connected to master: " + master + " : " + mId);
-//                            disconnect.setVisibility(View.VISIBLE);
-            /**connect.setEnabled(false);
-             disconnect.setEnabled(true);
-             disconnect.setOnClickListener(v -> {
-             navigator.getConnectionsClientInstance().disconnectFromEndpoint(mid);
-             recreate();
-             });*/
             viewModel.setIsMasterConnected(true);
             getLocation();
             Slave senslave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
