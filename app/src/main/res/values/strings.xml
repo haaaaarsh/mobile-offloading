@@ -13,4 +13,7 @@
     <!--    Master-->
     <string name="btn_advertise">Start Advertising</string>
 
+    <!--    Slave-->
+    <string name="btn_scan">Start Scanning</string>
+
 </resources>

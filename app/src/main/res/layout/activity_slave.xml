@@ -7,6 +7,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="viewModel"
             type="com.group70.mobileoffloading.ui.slave.SlaveViewModel" />
@@ -29,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:animateLayoutChanges="true"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:gravity="center"
@@ -37,11 +40,67 @@
                 android:paddingEnd="40dp">
 
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/masterDevice"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="@{viewModel.endPointDiscover ? View.VISIBLE : View.GONE}">
+
+                    <androidx.cardview.widget.CardView
+                        style="@style/CardView.Primary"
+                        android:onClick="@{() -> viewModel.connect()}">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="?attr/selectableItemBackground"
+                            android:orientation="vertical"
+                            android:paddingTop="24dp"
+                            android:paddingBottom="24dp">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="60dp"
+                                android:layout_marginLeft="8dp"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginBottom="20dp"
+                                android:scaleType="centerInside"
+                                android:src="@drawable/ic_master_device" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:text="@{viewModel.masterName}"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtHeartRate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:gravity="center"
+                                android:textColor="@android:color/holo_red_light"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
+
+
+                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SLAVE"/>
-
+                    android:layout_marginTop="40dp"
+                    android:enabled="@{!viewModel.endPointDiscover}"
+                    android:onClick="@{() -> viewModel.startScanning()}"
+                    android:text="@string/btn_scan" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.core.widget.NestedScrollView>

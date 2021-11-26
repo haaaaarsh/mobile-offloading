@@ -15,7 +15,7 @@ import com.group70.mobileoffloading.ui.base.BaseViewModel;
 
 public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
-    private final String TAG = "MasterActivity<>";
+    private final String TAG = "MasterViewModel<>";
     private MasterNavigator navigator;
     private ObservableField<String> connectionStatus = new ObservableField<>();
 
@@ -24,10 +24,9 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
     }
 
     public void startAdvertising() {
-        String name = android.os.Build.MODEL;
         navigator = getNavigator();
         try {
-            getNavigator().getConnectionsClientInstance().startAdvertising(name,
+            getNavigator().getConnectionsClientInstance().startAdvertising(android.os.Build.MODEL,
                     getNavigator().getActivityContext().getPackageName(),
                     connectionLifecycleCallback,
                     new AdvertisingOptions.Builder().setStrategy(Strategy.P2P_STAR).build());
