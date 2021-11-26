@@ -2,9 +2,12 @@ package com.group70.mobileoffloading.ui.slave;
 
 import android.util.Log;
 
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
-import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.nearby.connection.ConnectionInfo;
+import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
+import com.google.android.gms.nearby.connection.ConnectionResolution;
 import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
 import com.google.android.gms.nearby.connection.DiscoveryOptions;
 import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
@@ -14,15 +17,21 @@ import com.group70.mobileoffloading.ui.base.BaseViewModel;
 public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
 
     private final String TAG = "SlaveViewModel<>";
+    private SlaveNavigator navigator;
     private ObservableField<String> connectionStatus = new ObservableField<>();
     private ObservableField<String> masterName = new ObservableField<>();
     private ObservableField<Boolean> endPointDiscover = new ObservableField<>(false);
+    private ObservableBoolean mIsLoading = new ObservableBoolean();
+    private ObservableBoolean isMasterConnected = new ObservableBoolean();
+    private String masterDeviceName = null, masterDeviceId = null;
 
     public SlaveViewModel() {
 
     }
 
     public void startScanning() {
+        navigator = getNavigator();
+        setIsLoading(true);
         try {
             getNavigator().getConnectionsClientInstance().startDiscovery(getNavigator().getActivityContext().getPackageName(),
                     endpointDiscoveryCallback,
@@ -36,21 +45,47 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
             new EndpointDiscoveryCallback() {
                 @Override
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
-                    String masterName = info.getEndpointName();
-                    String masterId = endpointId;
-                    setConnectionStatus("Found Master " + masterName + " : " + masterId);
-                    setMasterName(masterName + " (ID: " + masterId + ")");
+                    masterDeviceName = info.getEndpointName();
+                    masterDeviceId = endpointId;
+                    setConnectionStatus("Found Master " + masterDeviceName + " : " + masterDeviceId);
+                    setMasterName(masterDeviceName + " (ID: " + masterDeviceId + ")");
                     endPointDiscover.set(true);
+                    setIsLoading(false);
                 }
 
                 @Override
                 public void onEndpointLost(String endpointId) {
+                    setIsLoading(false);
                 }
             };
 
     public void connect() {
-
+        getNavigator().getConnectionsClientInstance().requestConnection(getNavigator().getDeviceName(),
+                masterDeviceId,
+                connectionLifecycleCallback);
     }
+
+    private final ConnectionLifecycleCallback connectionLifecycleCallback =
+            new ConnectionLifecycleCallback() {
+                String slaveName = null;
+                String slaveId = null;
+
+                @Override
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
+                    Log.e(TAG, "onConnectionInitiated: establishing connection");
+                    navigator.showAlertDialog(endpointId, connectionInfo);
+                }
+
+                @Override
+                public void onConnectionResult(String endpointId, ConnectionResolution result) {
+                    navigator.onConnectionSuccess(endpointId, result);
+                }
+
+                @Override
+                public void onDisconnected(String endpointId) {
+
+                }
+            };
 
     public ObservableField<String> getConnectionStatus() {
         return connectionStatus;
@@ -74,5 +109,29 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
 
     public void setEndPointDiscover(Boolean endPointDiscover) {
         this.endPointDiscover.set(endPointDiscover);
+    }
+
+    public ObservableBoolean getIsLoading() {
+        return mIsLoading;
+    }
+
+    public void setIsLoading(boolean isLoading) {
+        mIsLoading.set(isLoading);
+    }
+
+    public ObservableBoolean getIsMasterConnected() {
+        return isMasterConnected;
+    }
+
+    public void setIsMasterConnected(Boolean isMasterConnected) {
+        this.isMasterConnected.set(isMasterConnected);
+    }
+
+    public String getMasterDeviceName() {
+        return masterDeviceName;
+    }
+
+    public String getMasterDeviceId() {
+        return masterDeviceId;
     }
 }

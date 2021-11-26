@@ -13,6 +13,7 @@ import java.util.Map;
 public interface MasterNavigator {
 
     Context getActivityContext();
+
     void showAlertDialog(String endpointId, ConnectionInfo connectionInfo);
 
     ConnectionsClient getConnectionsClientInstance();

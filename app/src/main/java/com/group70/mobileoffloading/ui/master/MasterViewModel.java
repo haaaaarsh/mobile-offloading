@@ -3,6 +3,7 @@ package com.group70.mobileoffloading.ui.master;
 import android.location.Location;
 import android.util.Log;
 
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -18,6 +19,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
     private final String TAG = "MasterViewModel<>";
     private MasterNavigator navigator;
     private ObservableField<String> connectionStatus = new ObservableField<>();
+    private ObservableBoolean mIsLoading = new ObservableBoolean();
 
     public MasterViewModel() {
 
@@ -131,5 +133,13 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
     public void setConnectionStatus(String connectionStatus) {
         this.connectionStatus.set(connectionStatus);
+    }
+
+    public ObservableBoolean getIsLoading() {
+        return mIsLoading;
+    }
+
+    public void setIsLoading(boolean isLoading) {
+        mIsLoading.set(isLoading);
     }
 }
