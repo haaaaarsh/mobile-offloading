@@ -18,7 +18,7 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
 
     private final String TAG = "SlaveViewModel<>";
     private SlaveNavigator navigator;
-    private ObservableField<String> connectionStatus = new ObservableField<>();
+    private ObservableField<String> connectionStatus = new ObservableField<>("Live Monitor");
     private ObservableField<String> masterName = new ObservableField<>();
     private ObservableField<Boolean> endPointDiscover = new ObservableField<>(false);
     private ObservableBoolean mIsLoading = new ObservableBoolean();

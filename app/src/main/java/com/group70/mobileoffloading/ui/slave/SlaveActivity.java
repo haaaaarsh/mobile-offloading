@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.Observable;
 import androidx.databinding.ObservableBoolean;
-import androidx.databinding.ObservableField;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -34,8 +33,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.data.Slave;
-import com.group70.mobileoffloading.ui.base.BaseActivity;
 import com.group70.mobileoffloading.databinding.ActivitySlaveBinding;
+import com.group70.mobileoffloading.ui.base.BaseActivity;
 import com.group70.mobileoffloading.utils.AppUtils;
 
 import java.io.ByteArrayInputStream;
@@ -71,6 +70,8 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
         setToolBar();
         setConnectionClients();
         setObservables();
+        getLocation();
+        isComputing = false;
     }
 
     private void setConnectionClients() {
@@ -179,10 +180,6 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
                         Log.e(TAG, "Last location : " + location.toString());
                         lat = location.getLatitude();
                         lon = location.getLongitude();
-//                        x.setVisibility(View.VISIBLE);
-//                        y.setVisibility(View.VISIBLE);
-                        /**x.setText(String.valueOf(lat));
-                         y.setText(String.valueOf(lon));*/
                     } else {
                         Log.d(TAG, "could not get location");
                     }
@@ -200,8 +197,8 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
             viewModel.setConnectionStatus("Connected to master: " + master + " : " + mId);
             viewModel.setIsMasterConnected(true);
             getLocation();
-            Slave senslave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
-            connectionsClient.sendPayload(mId, Payload.fromStream(new ByteArrayInputStream(gson.toJson(senslave).getBytes(UTF_8))));
+            Slave slave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
+            connectionsClient.sendPayload(mId, Payload.fromStream(new ByteArrayInputStream(gson.toJson(slave).getBytes(UTF_8))));
             Log.e(TAG, "sent");
             TimerTask timerTask = new KeepSending();
             timer = new Timer(true);

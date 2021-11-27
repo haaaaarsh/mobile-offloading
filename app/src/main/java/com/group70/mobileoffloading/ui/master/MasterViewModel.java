@@ -1,6 +1,5 @@
 package com.group70.mobileoffloading.ui.master;
 
-import android.location.Location;
 import android.util.Log;
 
 import androidx.databinding.ObservableBoolean;
@@ -10,7 +9,6 @@ import com.google.android.gms.nearby.connection.AdvertisingOptions;
 import com.google.android.gms.nearby.connection.ConnectionInfo;
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
 import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.Strategy;
 import com.group70.mobileoffloading.ui.base.BaseViewModel;
 
@@ -18,8 +16,10 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
     private final String TAG = "MasterViewModel<>";
     private MasterNavigator navigator;
-    private ObservableField<String> connectionStatus = new ObservableField<>();
+    private ObservableField<String> connectionStatus = new ObservableField<>("Live Monitor");
     private ObservableBoolean mIsLoading = new ObservableBoolean();
+    private ObservableBoolean slaveAvailable = new ObservableBoolean();
+    private ObservableBoolean resultAvailable = new ObservableBoolean();
 
     public MasterViewModel() {
 
@@ -37,6 +37,17 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
         }
     }
 
+    public void openResults() {
+        getNavigator().openResults();
+    }
+
+    public void masterCompute() {
+        getNavigator().masterCompute();
+    }
+
+    public void slaveCompute() {
+        getNavigator().slaveCompute();
+    }
 
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
             new ConnectionLifecycleCallback() {
@@ -55,30 +66,8 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                 @Override
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
-//                        if (sertype.equals("Master")) {
-
                         navigator.getConnectionsClientInstance().stopAdvertising();
                         setConnectionStatus("Latest Connected to : " + slaveName + " : " + slaveId);
-
-                        /*} else {
-                            connectionsClient.stopDiscovery();
-                            setconn.setText("Connected to master: " + mName + " : " + mid);
-//                            disconnect.setVisibility(View.VISIBLE);
-                            connect.setEnabled(false);
-                            disconnect.setEnabled(true);
-                            disconnect.setOnClickListener(v -> {
-                                connectionsClient.disconnectFromEndpoint(mid);
-                                recreate();
-                            });
-
-                            getLocation();
-                            Slave senslave = new Slave(sername, slaveId, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
-                            connectionsClient.sendPayload(mid, Payload.fromStream(new ByteArrayInputStream(gson.toJson(senslave).getBytes(UTF_8))));
-                            Log.e(TAG, "sent");
-                            TimerTask timerTask = new KeepSending();
-                            timer = new Timer(true);
-                            timer.scheduleAtFixedRate(timerTask, 0, 10000);
-                        }*/
                     } else {
                         Log.e(TAG, "onConnectionResult: connection failed");
 //                        if (sertype.equals("Master")) {
@@ -124,5 +113,21 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
 
     public void setIsLoading(boolean isLoading) {
         mIsLoading.set(isLoading);
+    }
+
+    public ObservableBoolean getSlaveAvailable() {
+        return slaveAvailable;
+    }
+
+    public void setSlaveAvailable(Boolean slaveAvailable) {
+        this.slaveAvailable.set(slaveAvailable);
+    }
+
+    public ObservableBoolean getResultAvailable() {
+        return resultAvailable;
+    }
+
+    public void setResultAvailable(Boolean resultAvailable) {
+        this.resultAvailable.set(resultAvailable);
     }
 }

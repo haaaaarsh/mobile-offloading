@@ -18,12 +18,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/light_gray"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:fillViewport="true"
             android:scrollbars="none">
 
@@ -39,16 +43,35 @@
                 android:paddingStart="40dp"
                 android:paddingEnd="40dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{viewModel.connectionStatus}" />
+                <androidx.cardview.widget.CardView style="@style/CardView.Primary"
+                    android:layout_marginBottom="20dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    android:paddingTop="24dp"
+                    android:paddingBottom="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="@{viewModel.connectionStatus}"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+                </androidx.cardview.widget.CardView>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvSlaves"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:overScrollMode="never"
                     android:scrollbars="none" />
 
                 <Button
@@ -57,6 +80,105 @@
                     android:layout_marginTop="40dp"
                     android:onClick="@{() -> viewModel.startAdvertising()}"
                     android:text="@string/btn_advertise" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="60dp"
+                    android:animateLayoutChanges="true"
+                    android:orientation="horizontal">
+
+                    <androidx.cardview.widget.CardView
+                        style="@style/CardView.Primary"
+                        android:layout_marginEnd="2dp"
+                        android:layout_weight="1"
+                        android:visibility="@{viewModel.slaveAvailable ? View.VISIBLE : View.GONE}">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="?attr/selectableItemBackground"
+                            android:orientation="vertical"
+                            android:paddingTop="24dp"
+                            android:paddingBottom="24dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginStart="6dp"
+                                android:text="@string/compute_header"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <Button
+                                android:id="@+id/btnMaster"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="40dp"
+                                android:enabled="false"
+                                android:onClick="@{() -> viewModel.masterCompute()}"
+                                android:text="@string/btn_master" />
+
+                            <Button
+                                android:id="@+id/btnSlave"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="20dp"
+                                android:enabled="false"
+                                android:onClick="@{() -> viewModel.slaveCompute()}"
+                                android:text="@string/btn_slave" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        style="@style/CardView.Primary"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="2dp"
+                        android:layout_weight="1"
+                        android:visibility="@{viewModel.resultAvailable ? View.VISIBLE : View.GONE}">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:background="?attr/selectableItemBackground"
+                            android:orientation="vertical"
+                            android:paddingTop="24dp"
+                            android:paddingBottom="24dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:layout_marginStart="6dp"
+                                android:text="@string/result_header"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <Button
+                                android:id="@+id/btnResults"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginTop="40dp"
+                                android:onClick="@{() -> viewModel.openResults()}"
+                                android:text="@string/btn_results" />
+
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+                </LinearLayout>
             </androidx.appcompat.widget.LinearLayoutCompat>
         </androidx.core.widget.NestedScrollView>
 

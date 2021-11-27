@@ -2,11 +2,10 @@ package com.group70.mobileoffloading.ui.master;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +14,6 @@ import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -26,20 +24,23 @@ import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.data.Slave;
 import com.group70.mobileoffloading.databinding.ActivityMasterBinding;
 import com.group70.mobileoffloading.ui.base.BaseActivity;
+import com.group70.mobileoffloading.ui.result.ResultActivity;
 import com.group70.mobileoffloading.utils.AppUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class MasterActivity extends BaseActivity<MasterViewModel> implements MasterNavigator, SlaveAdapter.SlaveClickListener {
@@ -51,9 +52,18 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     private static volatile Map<String, int[]> slavesMap = new LinkedHashMap<>();
     private static volatile LinkedList<int[]> slaveLinkList = new LinkedList<>();
     private static Map<String, Slave> slaveMap2 = new HashMap<>();
+    private static Map<String, String> tempMap = new HashMap<>();
     private ArrayList<Slave> connectedList = new ArrayList<>();
     private double lat, lon;
     private SlaveAdapter adapter;
+    private Gson gson = new Gson();
+
+    private static int diff = 5;
+    private static int dim = 50;
+    private static volatile int[][] m1 = new int[dim][dim];
+    private static volatile int[][] m2 = new int[dim][dim];
+    private static volatile int[][] output = new int[dim][dim];
+    private long start = 0, startslave = 0, startbattery = 0, startbatteryslave = 0;
 
     @NonNull
     @Override
@@ -70,6 +80,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         setToolBar();
         setConnectionClients();
         setRecyclerView();
+        generateRandomMatrix();
     }
 
     private void setConnectionClients() {
@@ -106,27 +117,6 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 
-    private void getLocation() {
-        if (this.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(MasterActivity.this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        Log.e(TAG, "Last location : " + location.toString());
-                        lat = location.getLatitude();
-                        lon = location.getLongitude();
-//                        x.setVisibility(View.VISIBLE);
-//                        y.setVisibility(View.VISIBLE);
-                        /**x.setText(String.valueOf(lat));
-                         y.setText(String.valueOf(lon));*/
-                    } else {
-                        Log.d(TAG, "could not get location");
-                    }
-                }
-            });
-        }
-    }
-
     private final PayloadCallback payloadCallback =
             new PayloadCallback() {
                 @Override
@@ -138,14 +128,14 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     try {
                         if (slave.result == null) {
                             AppUtils.writeToFile(MasterActivity.this, slave);
-                            if (slave.bat > 20 && AppUtils.getDistance(lat, lon, slave.lat, slave.lon, slave.name) < 2000) {
+                            if (slave.battery > 20 && AppUtils.getDistance(lat, lon, slave.latitude, slave.longitude, slave.name) < 2000) {
                                 if (!slaveMap2.containsKey(endpointId)) {
                                     slave.connected = true;
                                     slaveMap2.put(endpointId, slave);
                                     addSlaveToList();
                                 }
-                                /**scompute.setEnabled(true);*/
-                                /**listSlaves();*/
+                                binding.btnSlave.setEnabled(true);
+                                debugLogSlaves();
                                 /**slave_log.setEnabled(true);*/
                             } else {
                                 if (slavesMap.containsKey(endpointId)) {
@@ -159,30 +149,30 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                     setRecyclerView();
                                     slaveMap2.get(endpointId).connected = false;
                                 }
-                                /**listSlaves();*/
+                                debugLogSlaves();
                                 if (slaveMap2.size() > 0) {
-                                    /**prints();*/
+                                    prints();
                                 }
                             }
                         } else {
-                            /**computeOutput(slave, endpointId);*/
+                            getOutput(slave, endpointId);
                             AppUtils.writeToFile(MasterActivity.this, slave);
                             if (!slaveLinkList.isEmpty()) {
-                                /**generateSlaveMatrix(endpointId);*/
+                                generateSlaveMatrix(endpointId);
                             } else if (slavesMap.isEmpty()) {
                                 long end = System.currentTimeMillis();
                                 BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
                                 long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-                                /**Double totalEnergy = (1.0 * (Math.abs(startbattery - endEnergy))) / 1000.0;
-                                 viewModel.setConnectionStatus("Finished by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n" + "Power Consumed~ " + totalEnergy + " mAh\n")
+                                Double totalEnergy = (1.0 * (Math.abs(startbattery - endEnergy))) / 1000.0;
+                                 viewModel.setConnectionStatus("Finished by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n" + "Power Consumed~ " + totalEnergy + " mAh\n");
                                  start = 0;
                                  startbattery = 0;
-                                 Log.e("finalresult", Arrays.deepToString(output)); // Add to text file*/
-
+                                 Log.e("finalresult", Arrays.deepToString(output)); // Add to text file
+                                viewModel.setResultAvailable(true);
                                 for (String key : slaveMap2.keySet()) {
                                     Slave currentSlave = slaveMap2.get(key);
                                     currentSlave.comp = true;
-                                    /**slaveSend(currentSlave);*/
+                                    slaveSend(currentSlave);
                                 }
                             }
                         }
@@ -199,7 +189,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
 
     private void addSlaveToList() {
         for (String k : slaveMap2.keySet()) {
-            if (!connectedList.contains(slaveMap2.get(k))) {
+            if (!adapter.getList().contains(slaveMap2.get(k))) {
                 addConnection(slaveMap2.get(k));
                 AppUtils.writeToFile(this, slaveMap2.get(k));
             }
@@ -209,13 +199,133 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
 
     private void setRecyclerView() {
         adapter = new SlaveAdapter(this, this);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(binding.rvSlaves.getContext(),
-                new LinearLayoutManager(this).getOrientation());
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         binding.rvSlaves.setLayoutManager(layoutManager);
-        binding.rvSlaves.addItemDecoration(dividerItemDecoration);
         binding.rvSlaves.setAdapter(adapter);
         adapter.addAll(connectedList);
+    }
+
+    private void generateRandomMatrix() {
+        m1 = new int[dim][dim];
+        m2 = new int[dim][dim];
+        output = new int[dim][dim];
+        for (int i = 0; i < m1.length; i++) {
+            for (int j = 0; j < m1[0].length; j++) {
+                m1[i][j] = (int) (Math.random() * 10);
+                m2[i][j] = (int) (Math.random() * 10);
+            }
+        }
+        binding.btnMaster.setEnabled(true);
+        binding.btnSlave.setEnabled(true);
+        showSnackbar("Matrices have been created", Color.RED, Color.WHITE);
+    }
+
+    @Override
+    public void masterCompute() {
+        showSnackbar("Computing on master", Color.RED, Color.WHITE);
+        long startTime = System.currentTimeMillis();
+        BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
+        long startEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+        Slave mslave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, m1, m2, null, true);
+        AppUtils.multiplication(mslave);
+        long endTime = System.currentTimeMillis();
+        long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+        Double diffe = (1.0 * (Math.abs(startEnergy - endEnergy))) / 1000;
+        viewModel.setConnectionStatus("Computation Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n" + "Power Consumed~ " + diffe + " mAh");
+    }
+
+    @Override
+    public void slaveCompute() {
+        prints();
+        slaveLinkList = new LinkedList<>();
+        slavesMap = new HashMap<>();
+        start = System.currentTimeMillis();
+        BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
+        startbattery = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+
+        for (int i = 0; i < m1.length; i += diff) {
+            for (int j = 0; j < m2.length; j += diff) {
+                slaveLinkList.addLast(new int[]{i, j});
+            }
+        }
+        for (String k : slaveMap2.keySet()) {
+            if (slaveMap2.get(k).connected) {
+                Slave currentSlave = slaveMap2.get(k);
+                int[] cur = slaveLinkList.removeFirst();
+                currentSlave.m1 = Arrays.copyOfRange(m1, cur[0], cur[0] + diff);
+                currentSlave.m2 = Arrays.copyOfRange(m2, cur[1], cur[1] + diff);
+
+                slavesMap.put(k, cur);
+                slaveSend(currentSlave);
+            }
+        }
+    }
+
+
+    private void generateSlaveMatrix(String d) {
+        prints();
+        int[] ind = slaveLinkList.removeFirst();
+        slavesMap.put(d, ind);
+        new Thread(() -> {
+            Slave currentSlave = slaveMap2.get(d);
+            if (currentSlave != null) {
+                int minr = ind[0];
+                int maxr = ind[0] + diff;
+                int minc = ind[1];
+                int maxc = ind[1] + diff;
+                currentSlave.m1 = Arrays.copyOfRange(m1, minr, maxr);
+                currentSlave.m2 = Arrays.copyOfRange(m2, minc, maxc);
+                slaveSend(currentSlave);
+            } else {
+                slaveMap2.remove(d);
+            }
+        }).start();
+    }
+
+    public void slaveSend(Slave slave) {
+        connectionsClient.sendPayload(slave.id, Payload.fromStream(new ByteArrayInputStream(gson.toJson(slave).getBytes(UTF_8))));
+    }
+
+    private void getOutput(Slave s, String d) {
+        final int[] cur = slavesMap.get(d);
+        final int[][] rslave = s.result;
+        new Thread(() -> {
+            if (cur != null) {
+                for (int i = cur[0]; i < cur[0] + diff; i += 1) {
+                    for (int j = cur[1]; j < cur[1] + diff; j += 1) {
+                        output[i][j] = rslave[i - cur[0]][j - cur[1]];
+                    }
+                }
+            }
+        }).start();
+        slavesMap.remove(d);
+        binding.btnResults.setEnabled(true);
+        if (!tempMap.containsKey(s.name)) {
+            tempMap.put(s.name, Arrays.deepToString(rslave));
+        } else {
+            String lout = tempMap.get(s.name) + "\n";
+            lout += Arrays.deepToString(rslave);
+            tempMap.put(s.name, lout);
+        }
+    }
+
+    private void prints() {
+        List<String> list = new ArrayList<>();
+        for (String k : slaveMap2.keySet()) {
+            if (slaveMap2.get(k).connected) {
+                list.add(slaveMap2.get(k).name + " : " + k);
+            }
+        }
+        viewModel.setConnectionStatus("Slaves Computing :\n" + String.join("\n", list));
+    }
+
+    private void debugLogSlaves() {
+        for (String key : slaveMap2.keySet()) {
+            if (slaveMap2.get(key).id == null) {
+                slaveMap2.get(key).id = key;
+            }
+            Log.d(TAG, slaveMap2.get(key).getAllVariables());
+        }
     }
 
     @Override
@@ -276,16 +386,39 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     @Override
     public void addConnection(Slave s) {
         adapter.add(s);
+        if (!adapter.getList().isEmpty())
+            viewModel.setSlaveAvailable(true);
     }
 
     @Override
     public void removeConnection(Slave s) {
         adapter.remove(s);
+        if (adapter.getList().isEmpty())
+            viewModel.setSlaveAvailable(false);
     }
 
     @Override
     public void setConnectionsList() {
 
+    }
+
+    @Override
+    public void openResults() {
+        Slave slave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, m1, m2, null, true);
+        AppUtils.multiplication(slave);
+        int[][] localmresult = slave.result;
+        int[][] finalOut = new int[dim][dim];
+        for (int i = 0; i < dim; i++) {
+            for (int j = 0; j < dim; j++) {
+                finalOut[i][j] = output[i][j] - localmresult[i][j];
+            }
+        }
+
+        Intent intent = new Intent(this, ResultActivity.class);
+        intent.putExtra("Result", Arrays.deepToString(finalOut));
+        intent.putExtra("Master", Arrays.deepToString(localmresult));
+        intent.putExtra("Slaves", Arrays.deepToString(output));
+        startActivity(intent);
     }
 
     @Override

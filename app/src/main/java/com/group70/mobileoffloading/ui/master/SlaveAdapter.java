@@ -1,6 +1,7 @@
 package com.group70.mobileoffloading.ui.master;
 
 import android.app.Activity;
+import android.location.Location;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,8 +54,11 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
         }
 
         void bindData(final int position) {
-            binding.name.setText(slavesList.get(position).name);
-            binding.rlRoot.setOnClickListener(new View.OnClickListener() {
+            Slave s = slavesList.get(position);
+            binding.name.setText(s.name);
+            binding.battery.setText(String.format("%d%%", (int)s.battery));
+            binding.coordinates.setText(formatLatLong(s.latitude, s.longitude));
+            binding.llRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     slaveClickListener.onSlaveClick(slavesList.get(position));
@@ -89,5 +93,43 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
 
     public interface SlaveClickListener {
         public void onSlaveClick(Slave slave);
+    }
+
+    private String formatLatLong(double latitude, double longitude) {
+        StringBuilder builder = new StringBuilder();
+
+        if (latitude < 0) {
+            builder.append("S ");
+        } else {
+            builder.append("N ");
+        }
+
+        String latitudeDegrees = Location.convert(Math.abs(latitude), Location.FORMAT_SECONDS);
+        String[] latitudeSplit = latitudeDegrees.split(":");
+        builder.append(latitudeSplit[0]);
+        builder.append("°");
+        builder.append(latitudeSplit[1]);
+        builder.append("'");
+        builder.append(latitudeSplit[2]);
+        builder.append("\"");
+
+        builder.append(" ");
+
+        if (longitude < 0) {
+            builder.append("W ");
+        } else {
+            builder.append("E ");
+        }
+
+        String longitudeDegrees = Location.convert(Math.abs(longitude), Location.FORMAT_SECONDS);
+        String[] longitudeSplit = longitudeDegrees.split(":");
+        builder.append(longitudeSplit[0]);
+        builder.append("°");
+        builder.append(longitudeSplit[1]);
+        builder.append("'");
+        builder.append(longitudeSplit[2]);
+        builder.append("\"");
+
+        return builder.toString();
     }
 }

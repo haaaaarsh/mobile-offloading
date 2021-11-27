@@ -4,6 +4,7 @@
     <!--    Toolbar Titles-->
     <string name="title_master">(Master)</string>
     <string name="title_slave">(Slave)</string>
+    <string name="title_result">Result</string>
 
     <!--    Role Picker-->
     <string name="master">Master</string>
@@ -12,6 +13,11 @@
 
     <!--    Master-->
     <string name="btn_advertise">Start Advertising</string>
+    <string name="compute_header">Pick the type of device to solve matrix problem</string>
+    <string name="btn_master">Master</string>
+    <string name="btn_slave">Slave</string>
+    <string name="btn_results">Results</string>
+    <string name="result_header">View Results</string>
 
     <!--    Slave-->
     <string name="btn_scan">Start Scanning</string>

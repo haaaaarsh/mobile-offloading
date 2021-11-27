@@ -43,4 +43,10 @@ public interface MasterNavigator {
     void removeConnection(Slave s);
 
     void setConnectionsList();
+
+    void openResults();
+
+    void masterCompute();
+
+    void slaveCompute();
 }
