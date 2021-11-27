@@ -1,24 +1,32 @@
 package com.group70.mobileoffloading.ui.result;
 
-import android.util.Log;
-
-import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 
-import com.google.android.gms.nearby.connection.ConnectionInfo;
-import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
-import com.google.android.gms.nearby.connection.ConnectionResolution;
-import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
-import com.google.android.gms.nearby.connection.DiscoveryOptions;
-import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
-import com.google.android.gms.nearby.connection.Strategy;
 import com.group70.mobileoffloading.ui.base.BaseViewModel;
 
 public class ResultViewModel extends BaseViewModel<ResultNavigator> {
 
     private final String TAG = "ResultViewModel<>";
+    private ObservableField<String> masterRes = new ObservableField<>();
+    private ObservableField<String> slaveRes = new ObservableField<>();
 
     public ResultViewModel() {
 
+    }
+
+    public ObservableField<String> getMasterRes() {
+        return masterRes;
+    }
+
+    public void setMasterRes(String masterRes) {
+        this.masterRes.set(masterRes);
+    }
+
+    public ObservableField<String> getSlaveRes() {
+        return slaveRes;
+    }
+
+    public void setSlaveRes(String slaveRes) {
+        this.slaveRes.set(slaveRes);
     }
 }

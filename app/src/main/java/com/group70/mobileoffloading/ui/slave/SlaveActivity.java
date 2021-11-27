@@ -112,7 +112,9 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
                             long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
 
                             Double totalEnergy = (1.0 * (Math.abs(startbatteryslave - endEnergy))) / 1000;
-                            viewModel.setConnectionStatus("Finished in " + (double) (endTime - startslave) / 1000 + " seconds\n" + "Power Consumed: " + totalEnergy + " mAh");
+                            viewModel.setConnectionStatus("Finished in " + (double) (endTime - startslave) / 1000 + " seconds\n"
+//                                    + "Power Consumed: " + totalEnergy + " mAh"
+                            );
                         } else {
                             if (!isComputing) {
                                 isComputing = true;

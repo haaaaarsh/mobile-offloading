@@ -164,7 +164,9 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
                                 long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
                                 Double totalEnergy = (1.0 * (Math.abs(startbattery - endEnergy))) / 1000.0;
-                                 viewModel.setConnectionStatus("Finished by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n" + "Power Consumed~ " + totalEnergy + " mAh\n");
+                                 viewModel.setConnectionStatus("Finished by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n"
+//                                         + "Power Consumed~ " + totalEnergy + " mAh\n"
+                                 );
                                  start = 0;
                                  startbattery = 0;
                                  Log.e("finalresult", Arrays.deepToString(output)); // Add to text file
@@ -231,7 +233,9 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         long endTime = System.currentTimeMillis();
         long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
         Double diffe = (1.0 * (Math.abs(startEnergy - endEnergy))) / 1000;
-        viewModel.setConnectionStatus("Computation Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n" + "Power Consumed~ " + diffe + " mAh");
+        viewModel.setConnectionStatus("Computation Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n"
+//                + "Power Consumed~ " + diffe + " mAh"
+        );
     }
 
     @Override

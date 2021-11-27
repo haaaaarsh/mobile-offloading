@@ -24,4 +24,8 @@
     <string name="connect">Tap to Connect</string>
     <string name="disconnect">Tap to Disconnect</string>
 
+    <!--    Result-->
+    <string name="master_result">Result calculated by Master</string>
+    <string name="slave_result">Result calculated by Slave(s)</string>
+
 </resources>

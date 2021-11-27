@@ -2,6 +2,8 @@ package com.group70.mobileoffloading.ui.result;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
@@ -29,6 +31,16 @@ public class ResultActivity extends BaseActivity<ResultViewModel> implements Res
         setDataBindings();
         viewModel.setNavigator(this);
         setToolBar();
+        getResult();
+    }
+
+    private void getResult() {
+        String zeroCheck = getIntent().getStringExtra("Result");
+        String masterResult = getIntent().getStringExtra("Master");
+        String slaveResult = getIntent().getStringExtra("Slaves");
+        viewModel.setMasterRes(masterResult);
+        viewModel.setSlaveRes(slaveResult);
+        Log.e(TAG, zeroCheck);
     }
 
     private void setToolBar() {
