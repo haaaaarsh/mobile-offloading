@@ -2,10 +2,13 @@ package com.group70.mobileoffloading.ui.master;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +27,7 @@ import com.google.android.gms.nearby.connection.ConnectionsClient;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 import com.group70.mobileoffloading.R;
 import com.group70.mobileoffloading.data.Slave;
@@ -54,16 +58,16 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     private static Map<String, Slave> slaveMap2 = new HashMap<>();
     private static Map<String, String> tempMap = new HashMap<>();
     private ArrayList<Slave> connectedList = new ArrayList<>();
-    private double lat, lon;
+    private double latitude, longitude;
     private SlaveAdapter adapter;
     private Gson gson = new Gson();
 
-    private static int diff = 5;
-    private static int dim = 50;
-    private static volatile int[][] m1 = new int[dim][dim];
-    private static volatile int[][] m2 = new int[dim][dim];
-    private static volatile int[][] output = new int[dim][dim];
-    private long start = 0, startslave = 0, startbattery = 0, startbatteryslave = 0;
+    private static int incr = 5;
+    private static int size = 50;
+    private static volatile int[][] matrix1 = new int[size][size];
+    private static volatile int[][] matrix2 = new int[size][size];
+    private static volatile int[][] output = new int[size][size];
+    private long start = 0, startBatteryLevel = 0;
 
     @NonNull
     @Override
@@ -81,6 +85,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         setConnectionClients();
         setRecyclerView();
         generateRandomMatrix();
+        getLocation();
     }
 
     private void setConnectionClients() {
@@ -128,7 +133,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     try {
                         if (slave.result == null) {
                             AppUtils.writeToFile(MasterActivity.this, slave);
-                            if (slave.battery > 20 && AppUtils.getDistance(lat, lon, slave.latitude, slave.longitude, slave.name) < 2000) {
+                            if (slave.battery > 20 && AppUtils.getDistance(latitude, longitude, slave.latitude, slave.longitude, slave.name) < 2000) {
                                 if (!slaveMap2.containsKey(endpointId)) {
                                     slave.connected = true;
                                     slaveMap2.put(endpointId, slave);
@@ -143,7 +148,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                     slavesMap.remove(endpointId);
                                     slaveLinkList.addLast(b);
                                 }
-                                viewModel.setConnectionStatus("Disconnected: " + endpointId);
+                                viewModel.setConnectionStatus("Slave disconnected: " + "ID:" + endpointId + ")");
                                 if (slaveMap2.containsKey(endpointId)) {
                                     removeConnection(slaveMap2.get(endpointId));
                                     setRecyclerView();
@@ -151,7 +156,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 }
                                 debugLogSlaves();
                                 if (slaveMap2.size() > 0) {
-                                    prints();
+                                    printSlaves();
                                 }
                             }
                         } else {
@@ -163,13 +168,13 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 long end = System.currentTimeMillis();
                                 BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
                                 long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-                                Double totalEnergy = (1.0 * (Math.abs(startbattery - endEnergy))) / 1000.0;
-                                 viewModel.setConnectionStatus("Finished by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n"
+                                Double totalEnergy = (1.0 * (Math.abs(startBatteryLevel - endEnergy))) / 1000.0;
+                                viewModel.setConnectionStatus("Matrix solved by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n"
 //                                         + "Power Consumed~ " + totalEnergy + " mAh\n"
-                                 );
-                                 start = 0;
-                                 startbattery = 0;
-                                 Log.e("finalresult", Arrays.deepToString(output)); // Add to text file
+                                );
+                                start = 0;
+                                startBatteryLevel = 0;
+                                Log.e("finalresult", Arrays.deepToString(output)); // Add to text file
                                 viewModel.setResultAvailable(true);
                                 for (String key : slaveMap2.keySet()) {
                                     Slave currentSlave = slaveMap2.get(key);
@@ -200,7 +205,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     }
 
     private void setRecyclerView() {
-        adapter = new SlaveAdapter(this, this);
+        adapter = new SlaveAdapter(this, this, latitude, longitude);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         binding.rvSlaves.setLayoutManager(layoutManager);
         binding.rvSlaves.setAdapter(adapter);
@@ -208,18 +213,35 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
     }
 
     private void generateRandomMatrix() {
-        m1 = new int[dim][dim];
-        m2 = new int[dim][dim];
-        output = new int[dim][dim];
-        for (int i = 0; i < m1.length; i++) {
-            for (int j = 0; j < m1[0].length; j++) {
-                m1[i][j] = (int) (Math.random() * 10);
-                m2[i][j] = (int) (Math.random() * 10);
+        matrix1 = new int[size][size];
+        matrix2 = new int[size][size];
+        output = new int[size][size];
+        for (int i = 0; i < matrix1.length; i++) {
+            for (int j = 0; j < matrix1[0].length; j++) {
+                matrix1[i][j] = (int) (Math.random() * 10);
+                matrix2[i][j] = (int) (Math.random() * 10);
             }
         }
         binding.btnMaster.setEnabled(true);
         binding.btnSlave.setEnabled(true);
         showSnackbar("Matrices have been created", Color.RED, Color.WHITE);
+    }
+
+    private void getLocation() {
+        if (this.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        Log.e(TAG, "Last location : " + location.toString());
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                    } else {
+                        Log.d(TAG, "could not get location");
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -228,27 +250,27 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         long startTime = System.currentTimeMillis();
         BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
         long startEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
-        Slave mslave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, m1, m2, null, true);
+        Slave mslave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, matrix1, matrix2, null, true, 0f);
         AppUtils.multiplication(mslave);
         long endTime = System.currentTimeMillis();
         long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
         Double diffe = (1.0 * (Math.abs(startEnergy - endEnergy))) / 1000;
-        viewModel.setConnectionStatus("Computation Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n"
+        viewModel.setConnectionStatus("Execution Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n"
 //                + "Power Consumed~ " + diffe + " mAh"
         );
     }
 
     @Override
     public void slaveCompute() {
-        prints();
+        printSlaves();
         slaveLinkList = new LinkedList<>();
         slavesMap = new HashMap<>();
         start = System.currentTimeMillis();
         BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
-        startbattery = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+        startBatteryLevel = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
 
-        for (int i = 0; i < m1.length; i += diff) {
-            for (int j = 0; j < m2.length; j += diff) {
+        for (int i = 0; i < matrix1.length; i += incr) {
+            for (int j = 0; j < matrix2.length; j += incr) {
                 slaveLinkList.addLast(new int[]{i, j});
             }
         }
@@ -256,8 +278,8 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
             if (slaveMap2.get(k).connected) {
                 Slave currentSlave = slaveMap2.get(k);
                 int[] cur = slaveLinkList.removeFirst();
-                currentSlave.m1 = Arrays.copyOfRange(m1, cur[0], cur[0] + diff);
-                currentSlave.m2 = Arrays.copyOfRange(m2, cur[1], cur[1] + diff);
+                currentSlave.m1 = Arrays.copyOfRange(matrix1, cur[0], cur[0] + incr);
+                currentSlave.m2 = Arrays.copyOfRange(matrix2, cur[1], cur[1] + incr);
 
                 slavesMap.put(k, cur);
                 slaveSend(currentSlave);
@@ -267,18 +289,18 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
 
 
     private void generateSlaveMatrix(String d) {
-        prints();
+        printSlaves();
         int[] ind = slaveLinkList.removeFirst();
         slavesMap.put(d, ind);
         new Thread(() -> {
             Slave currentSlave = slaveMap2.get(d);
             if (currentSlave != null) {
                 int minr = ind[0];
-                int maxr = ind[0] + diff;
+                int maxr = ind[0] + incr;
                 int minc = ind[1];
-                int maxc = ind[1] + diff;
-                currentSlave.m1 = Arrays.copyOfRange(m1, minr, maxr);
-                currentSlave.m2 = Arrays.copyOfRange(m2, minc, maxc);
+                int maxc = ind[1] + incr;
+                currentSlave.m1 = Arrays.copyOfRange(matrix1, minr, maxr);
+                currentSlave.m2 = Arrays.copyOfRange(matrix2, minc, maxc);
                 slaveSend(currentSlave);
             } else {
                 slaveMap2.remove(d);
@@ -295,8 +317,8 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         final int[][] rslave = s.result;
         new Thread(() -> {
             if (cur != null) {
-                for (int i = cur[0]; i < cur[0] + diff; i += 1) {
-                    for (int j = cur[1]; j < cur[1] + diff; j += 1) {
+                for (int i = cur[0]; i < cur[0] + incr; i += 1) {
+                    for (int j = cur[1]; j < cur[1] + incr; j += 1) {
                         output[i][j] = rslave[i - cur[0]][j - cur[1]];
                     }
                 }
@@ -313,14 +335,15 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         }
     }
 
-    private void prints() {
+    @Override
+    public void printSlaves() {
         List<String> list = new ArrayList<>();
         for (String k : slaveMap2.keySet()) {
             if (slaveMap2.get(k).connected) {
                 list.add(slaveMap2.get(k).name + " : " + k);
             }
         }
-        viewModel.setConnectionStatus("Slaves Computing :\n" + String.join("\n", list));
+        viewModel.setConnectionStatus("Slave devices solving the matrix:\n" + String.join("\n", list));
     }
 
     private void debugLogSlaves() {
@@ -408,20 +431,20 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
 
     @Override
     public void openResults() {
-        Slave slave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, m1, m2, null, true);
+        Slave slave = new Slave("master", "", 0.0, 0.0, 0.0, 0.0, matrix1, matrix2, null, true, 0f);
         AppUtils.multiplication(slave);
         int[][] localmresult = slave.result;
-        int[][] finalOut = new int[dim][dim];
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < dim; j++) {
+        int[][] finalOut = new int[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 finalOut[i][j] = output[i][j] - localmresult[i][j];
             }
         }
 
         Intent intent = new Intent(this, ResultActivity.class);
-        intent.putExtra("Result", Arrays.deepToString(finalOut));
-        intent.putExtra("Master", Arrays.deepToString(localmresult));
-        intent.putExtra("Slaves", Arrays.deepToString(output));
+        intent.putExtra("ResultMatrix", Arrays.deepToString(finalOut));
+        intent.putExtra("MasterMatrix", Arrays.deepToString(localmresult));
+        intent.putExtra("SlavesMatrix", Arrays.deepToString(output));
         startActivity(intent);
     }
 

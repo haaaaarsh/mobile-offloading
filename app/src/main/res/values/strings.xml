@@ -27,5 +27,6 @@
     <!--    Result-->
     <string name="master_result">Result calculated by Master</string>
     <string name="slave_result">Result calculated by Slave(s)</string>
+    <string name="diff_result">Difference between the two results</string>
 
 </resources>

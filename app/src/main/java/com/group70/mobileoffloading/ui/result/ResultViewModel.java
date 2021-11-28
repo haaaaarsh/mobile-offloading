@@ -9,6 +9,7 @@ public class ResultViewModel extends BaseViewModel<ResultNavigator> {
     private final String TAG = "ResultViewModel<>";
     private ObservableField<String> masterRes = new ObservableField<>();
     private ObservableField<String> slaveRes = new ObservableField<>();
+    private ObservableField<String> diffRes = new ObservableField<>();
 
     public ResultViewModel() {
 
@@ -28,5 +29,13 @@ public class ResultViewModel extends BaseViewModel<ResultNavigator> {
 
     public void setSlaveRes(String slaveRes) {
         this.slaveRes.set(slaveRes);
+    }
+
+    public ObservableField<String> getDiffRes() {
+        return diffRes;
+    }
+
+    public void setDiffRes(String diffRes) {
+        this.diffRes.set(diffRes);
     }
 }

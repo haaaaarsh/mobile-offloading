@@ -49,4 +49,6 @@ public interface MasterNavigator {
     void masterCompute();
 
     void slaveCompute();
+
+    void printSlaves();
 }

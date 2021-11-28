@@ -35,11 +35,12 @@ public class ResultActivity extends BaseActivity<ResultViewModel> implements Res
     }
 
     private void getResult() {
-        String zeroCheck = getIntent().getStringExtra("Result");
-        String masterResult = getIntent().getStringExtra("Master");
-        String slaveResult = getIntent().getStringExtra("Slaves");
+        String zeroCheck = getIntent().getStringExtra("ResultMatrix");
+        String masterResult = getIntent().getStringExtra("MasterMatrix");
+        String slaveResult = getIntent().getStringExtra("SlavesMatrix");
         viewModel.setMasterRes(masterResult);
         viewModel.setSlaveRes(slaveResult);
+        viewModel.setDiffRes(zeroCheck);
         Log.e(TAG, zeroCheck);
     }
 

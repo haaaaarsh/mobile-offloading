@@ -47,7 +47,7 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
                     masterDeviceName = info.getEndpointName();
                     masterDeviceId = endpointId;
-                    setConnectionStatus("Found Master " + masterDeviceName + " : " + masterDeviceId);
+                    setConnectionStatus("Master Device Found - " + masterDeviceName + " (ID: " + masterDeviceId + ")");
                     setMasterName(masterDeviceName + " (ID: " + masterDeviceId + ")");
                     endPointDiscover.set(true);
                     setIsLoading(false);

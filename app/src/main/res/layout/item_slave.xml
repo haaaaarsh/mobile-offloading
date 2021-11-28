@@ -11,9 +11,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
-        android:padding="6dp"
         android:clipChildren="false"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        android:padding="6dp">
 
         <androidx.cardview.widget.CardView style="@style/CardView.Primary">
 
@@ -21,6 +21,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
                 android:background="?attr/selectableItemBackground"
                 android:clipChildren="false"
                 android:clipToPadding="false"
@@ -89,6 +91,30 @@
 
                     <TextView
                         android:id="@+id/coordinates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center_horizontal"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_distance" />
+
+                    <TextView
+                        android:id="@+id/distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

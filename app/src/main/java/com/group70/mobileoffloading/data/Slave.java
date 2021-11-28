@@ -15,9 +15,10 @@ public class Slave implements Serializable {
     public double longitude;
     public double curbat;
     public boolean connected;
+    public float distanceFromMaster;
 
 
-    public Slave(String name, String id, double battery, double curbat, double latitude, double longitude, int[][] m1, int[][] m2, int[][] result, boolean connected) {
+    public Slave(String name, String id, double battery, double curbat, double latitude, double longitude, int[][] m1, int[][] m2, int[][] result, boolean connected, float distanceFromMaster) {
         this.name = name;
         this.id = id;
         this.battery = battery;
@@ -28,11 +29,15 @@ public class Slave implements Serializable {
         this.m2 = m2;
         this.result = result;
         this.connected = connected;
+        this.distanceFromMaster = distanceFromMaster;
+    }
 
+    public String getSlaveResult() {
+        String local = "Computed: " + Arrays.deepToString(result) + "\n";
+        return local;
     }
-    public String getSlaveResult(){
-        String local = "Computed: "+Arrays.deepToString(result)+"\n";
-        return  local;
+
+    public String getAllVariables() {
+        return "Server Name: " + name + "\n" + "EndpointID: " + id + "\n" + "Battery: " + battery + "%\n" + "Latitude: " + latitude + "\n" + "Longitude: " + longitude + "\n" + "Computed Result: " + Arrays.deepToString(result) + "\n";
     }
-    public String getAllVariables() {return "Server Name: " + name + "\n" + "EndpointID: " + id + "\n" + "Battery: " + battery + "%\n" + "Latitude: " + latitude + "\n" + "Longitude: " + longitude +"\n"+ "Computed Result: "+Arrays.deepToString(result)+"\n";}
 }

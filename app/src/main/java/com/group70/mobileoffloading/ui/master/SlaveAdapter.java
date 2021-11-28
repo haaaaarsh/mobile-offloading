@@ -21,11 +21,14 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
     private Activity context;
     private LayoutInflater inflater;
     private SlaveClickListener slaveClickListener;
+    private double latitude, longitude;
 
-    public SlaveAdapter(Activity context, SlaveClickListener slaveClickListener) {
+    public SlaveAdapter(Activity context, SlaveClickListener slaveClickListener, double latitude, double longitude) {
         this.context = context;
         this.slavesList = new ArrayList<>();
         this.slaveClickListener = slaveClickListener;
+        this.latitude = latitude;
+        this.longitude = longitude;
         inflater = LayoutInflater.from(context);
     }
 
@@ -58,6 +61,7 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
             binding.name.setText(s.name);
             binding.battery.setText(String.format("%d%%", (int)s.battery));
             binding.coordinates.setText(formatLatLong(s.latitude, s.longitude));
+            binding.distance.setText(getDistance(s.latitude, s.longitude));
             binding.llRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -131,5 +135,15 @@ public class SlaveAdapter extends RecyclerView.Adapter<SlaveAdapter.ViewHolder> 
         builder.append("\"");
 
         return builder.toString();
+    }
+
+    private String getDistance (double sLatitude, double sLongitude) {
+        Location startPoint=new Location("locationA");
+        startPoint.setLatitude(sLatitude);
+        startPoint.setLongitude(sLongitude);
+        Location endPoint=new Location("locationA");
+        endPoint.setLatitude(latitude);
+        endPoint.setLongitude(longitude);
+        return String.valueOf(startPoint.distanceTo(endPoint) + " m");
     }
 }

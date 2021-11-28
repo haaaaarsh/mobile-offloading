@@ -51,9 +51,9 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Gson gson = new Gson();
     private Timer timer;
-    private double lat, lon;
+    private double latitude, longitude;
     private boolean isComputing;
-    private long start = 0, startslave = 0, startbattery = 0, startbatteryslave = 0;
+    private long startSlave = 0, startBatterySlaveLevel = 0;
 
     @NonNull
     @Override
@@ -111,16 +111,16 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
                             BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
                             long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
 
-                            Double totalEnergy = (1.0 * (Math.abs(startbatteryslave - endEnergy))) / 1000;
-                            viewModel.setConnectionStatus("Finished in " + (double) (endTime - startslave) / 1000 + " seconds\n"
+                            Double totalEnergy = (1.0 * (Math.abs(startBatterySlaveLevel - endEnergy))) / 1000;
+                            viewModel.setConnectionStatus("Matrix solved in " + (double) (endTime - startSlave) / 1000 + " seconds\n"
 //                                    + "Power Consumed: " + totalEnergy + " mAh"
                             );
                         } else {
                             if (!isComputing) {
                                 isComputing = true;
-                                startslave = System.currentTimeMillis();
+                                startSlave = System.currentTimeMillis();
                                 BatteryManager batteryManager = (BatteryManager) getSystemService(Context.BATTERY_SERVICE);
-                                startbatteryslave = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
+                                startBatterySlaveLevel = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
                             }
                             viewModel.setConnectionStatus("Performing matrix multiplication for: " + viewModel.getMasterDeviceName() + " : " + viewModel.getMasterDeviceId());
                             Log.d("hello", "check");
@@ -180,8 +180,8 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
                 public void onSuccess(Location location) {
                     if (location != null) {
                         Log.e(TAG, "Last location : " + location.toString());
-                        lat = location.getLatitude();
-                        lon = location.getLongitude();
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
                     } else {
                         Log.d(TAG, "could not get location");
                     }
@@ -196,27 +196,27 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
         String mId = viewModel.getMasterDeviceId();
         if (result.getStatus().isSuccess()) {
             connectionsClient.stopDiscovery();
-            viewModel.setConnectionStatus("Connected to master: " + master + " : " + mId);
+            viewModel.setConnectionStatus("Established connection to " + master + " (ID: " + mId + ")");
             viewModel.setIsMasterConnected(true);
             getLocation();
-            Slave slave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
+            Slave slave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), latitude, longitude, null, null, null, true, 0.0f);
             connectionsClient.sendPayload(mId, Payload.fromStream(new ByteArrayInputStream(gson.toJson(slave).getBytes(UTF_8))));
             Log.e(TAG, "sent");
-            TimerTask timerTask = new KeepSending();
+            TimerTask timerTask = new SendLiveStatus();
             timer = new Timer(true);
             timer.scheduleAtFixedRate(timerTask, 0, 10000);
         } else {
             viewModel.setIsMasterConnected(false);
             Log.e(TAG, "onConnectionResult: connection failed");
-            viewModel.setConnectionStatus("Connection Failed: " + master + " : " + mId);
+            viewModel.setConnectionStatus("Failed to connect to " + master + " (ID: " + mId + ")");
         }
     }
 
-    public class KeepSending extends TimerTask {
+    public class SendLiveStatus extends TimerTask {
         @Override
         public void run() {
             getLocation();
-            Slave slave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), lat, lon, null, null, null, true);
+            Slave slave = new Slave(getDeviceName(), null, getBatteryLevel(), getBatteryLevel(), latitude, longitude, null, null, null, true, 0.0f);
             connectionsClient.sendPayload(viewModel.getMasterDeviceId(), Payload.fromStream(new ByteArrayInputStream(gson.toJson(slave).getBytes(UTF_8))));
         }
     }

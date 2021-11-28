@@ -59,7 +59,7 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                     Log.e(TAG, "onConnectionInitiated: establishing connection");
                     slaveName = connectionInfo.getEndpointName();
                     slaveId = endpointId;
-                    setConnectionStatus("Connecting to: " + slaveName + " : " + slaveId);
+                    setConnectionStatus("Trying to connect to: " + slaveName + " (ID: " + slaveId + ")");
                     navigator.showAlertDialog(endpointId, connectionInfo);
                 }
 
@@ -67,14 +67,10 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                 public void onConnectionResult(String endpointId, ConnectionResolution result) {
                     if (result.getStatus().isSuccess()) {
                         navigator.getConnectionsClientInstance().stopAdvertising();
-                        setConnectionStatus("Latest Connected to : " + slaveName + " : " + slaveId);
+                        setConnectionStatus("Last connected slave device : " + slaveName + " (ID: " + slaveId + ")");
                     } else {
                         Log.e(TAG, "onConnectionResult: connection failed");
-//                        if (sertype.equals("Master")) {
-                        setConnectionStatus("Connection failed: " + slaveName + " : " + slaveId);
-//                        } else {
-//                            setconn.setText("Connection Failed: " + mName + " : " + mid);
-//                        }
+                        setConnectionStatus("Failed to connect: " + slaveName + " (ID: " + slaveId + ")");
                     }
                 }
 
@@ -88,12 +84,10 @@ public class MasterViewModel extends BaseViewModel<MasterNavigator> {
                     setConnectionStatus("Disconnected: " + endpointId);
                     if (navigator.getSlavesMap2().containsKey(endpointId)) {
                         navigator.removeConnection(navigator.getSlavesMap2().get(endpointId));
-                        /**navigator.setConnectionsList();*/
                         navigator.getSlavesMap2().get(endpointId).connected = false;
                     }
-                    /** listSlaves();*/
                     if (navigator.getSlavesMap2().size() > 0) {
-                        /** prints();*/
+                        getNavigator().printSlaves();
                     }
                 }
             };
