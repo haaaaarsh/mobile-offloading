@@ -129,11 +129,10 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                     Log.e(TAG, "received");
                     InputStream is = payload.asStream().asInputStream();
                     Slave slave = new Gson().fromJson(new InputStreamReader(is, UTF_8), Slave.class);
-                    //                    if (sertype.equals("Master")) {
                     try {
                         if (slave.result == null) {
                             AppUtils.writeToFile(MasterActivity.this, slave);
-                            if (slave.battery > 20 && AppUtils.getDistance(latitude, longitude, slave.latitude, slave.longitude, slave.name) < 2000) {
+                            if (slave.battery > 5 && AppUtils.getDistance(latitude, longitude, slave.latitude, slave.longitude, slave.name) < 2000) {
                                 if (!slaveMap2.containsKey(endpointId)) {
                                     slave.connected = true;
                                     slaveMap2.put(endpointId, slave);
@@ -170,7 +169,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
                                 long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
                                 Double totalEnergy = (1.0 * (Math.abs(startBatteryLevel - endEnergy))) / 1000.0;
                                 viewModel.setConnectionStatus("Matrix solved by Slave(s) in " + (double) (end - start) / 1000 + " seconds\n"
-//                                         + "Power Consumed~ " + totalEnergy + " mAh\n"
+                                         + "Power Consumed~ " + totalEnergy + " mAh\n"
                                 );
                                 start = 0;
                                 startBatteryLevel = 0;
@@ -256,7 +255,7 @@ public class MasterActivity extends BaseActivity<MasterViewModel> implements Mas
         long endEnergy = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER);
         Double diffe = (1.0 * (Math.abs(startEnergy - endEnergy))) / 1000;
         viewModel.setConnectionStatus("Execution Time :  " + (double) (endTime - startTime) / 1000 + " seconds\n"
-//                + "Power Consumed~ " + diffe + " mAh"
+                + "Power Consumed~ " + diffe + " mAh"
         );
     }
 

@@ -67,7 +67,6 @@ public class SlaveViewModel extends BaseViewModel<SlaveNavigator> {
         else {
             getNavigator().getConnectionsClientInstance().disconnectFromEndpoint(getMasterDeviceId());
             setIsMasterConnected(false);
-//            ((SlaveActivity) getNavigator().getActivityContext()).recreate();
         }
     }
 

@@ -113,7 +113,7 @@ public class SlaveActivity extends BaseActivity<SlaveViewModel> implements Slave
 
                             Double totalEnergy = (1.0 * (Math.abs(startBatterySlaveLevel - endEnergy))) / 1000;
                             viewModel.setConnectionStatus("Matrix solved in " + (double) (endTime - startSlave) / 1000 + " seconds\n"
-//                                    + "Power Consumed: " + totalEnergy + " mAh"
+                                    + "Power Consumed: " + totalEnergy + " mAh"
                             );
                         } else {
                             if (!isComputing) {
